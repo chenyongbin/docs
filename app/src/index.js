@@ -11,7 +11,7 @@ class App extends React.Component {
         <Navigation />
         <div className="container-fluid">
           <div className="row">
-            <Sidebar />
+            <Sidebar className="col-3" />
             <Content />
           </div>
         </div>

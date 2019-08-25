@@ -9,6 +9,7 @@ const projectName = process.env.npm_package_name,
   envName = process.env.NODE_ENV,
   isDevelopment = envName === "development";
 
+console.log("\n");
 console.log("================================");
 console.log(`项目名称：${projectName}`);
 console.log(`项目版本：${projectVersion}`);
@@ -36,10 +37,7 @@ const webpackConfig = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "babel-loader",
-        options: {
-          presets: ["@babel/preset-env", "@babel/preset-react"]
-        }
+        loader: "babel-loader"
       }
     ]
   },
