@@ -1,18 +1,19 @@
 import React from "react";
 import { Http } from "../utils";
+import { Layout } from "../variables";
 
-export default class Content extends React.Component {
+export default class MainContent extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = { doc: "" };
+    this.state = { html: "" };
     this.httpInstance = new Http();
   }
 
   componentDidMount() {
     this.httpInstance
       .getSlim("logs/dev1.md")
-      .then(({ Data: doc }) => this.setState({ doc }));
+      .then(({ Data: html }) => this.setState({ html }));
   }
 
   componentWillUnmount() {
@@ -24,9 +25,9 @@ export default class Content extends React.Component {
 
   render() {
     return (
-      <div className="content col border">
-        <div>
-          <pre>{this.state.doc}</pre>
+      <div className={`${Layout.mainContent} docs-main-content`}>
+        <div className="mt-4 bg-light">
+          <pre>{this.state.html}</pre>
         </div>
       </div>
     );
