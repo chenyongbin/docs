@@ -1,3 +1,3 @@
 export { default as Navigation } from "./Navigation";
-export { default as AsideNavigation } from "./AsideNavigation";
-export { default as MainContent } from "./MainContent";
+export { default as Sidebar } from "./Sidebar";
+export { default as Content } from "./Content";

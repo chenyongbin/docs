@@ -2,7 +2,7 @@ import React from "react";
 import { Http } from "../utils";
 import { Layout } from "../variables";
 
-export default class MainContent extends React.Component {
+export default class Content extends React.Component {
   constructor(props) {
     super(props);
 
@@ -25,7 +25,7 @@ export default class MainContent extends React.Component {
 
   render() {
     return (
-      <div className={`${Layout.mainContent} docs-main-content`}>
+      <div className={`${Layout.content} docs-content`}>
         <div className="mt-4 bg-light">
           <pre>{this.state.html}</pre>
         </div>

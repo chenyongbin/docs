@@ -1,0 +1,19 @@
+$avatar_unit: 2rem;
+
+.docs-navigation {
+  .avatar {
+    width: 2 * $avatar_unit;
+    height: 2 * $avatar_unit;
+    border-radius: $avatar_unit;
+  }
+
+  .nav-item {
+    font-size: 2rem;
+    font-weight: bold;
+
+    a {
+      color: #fff;
+      text-decoration: none;
+    }
+  }
+}

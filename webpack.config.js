@@ -38,6 +38,15 @@ const webpackConfig = {
         test: /\.js$/,
         exclude: /node_modules/,
         loader: "babel-loader"
+      },
+      {
+        test: /\.(jpg|svg|png|gif)$/i,
+        loader: "file-loader",
+        options: {
+          name: "[name].[hash:8].[ext]",
+          outputPath: "images",
+          publicPath: "images"
+        }
       }
     ]
   },
