@@ -1,4 +1,4 @@
-$avatar_unit: 2rem;
+$avatar_unit: 1.8rem;
 
 .docs-navigation {
   .avatar {
@@ -8,12 +8,14 @@ $avatar_unit: 2rem;
   }
 
   .nav-item {
-    font-size: 2rem;
-    font-weight: bold;
+    font-size: 1.8rem;
+  }
 
-    a {
-      color: #fff;
-      text-decoration: none;
+  .docs-navigation-right {
+    svg {
+      display: inline-block;
+      width: 1.8rem;
+      height: 1.8rem;
     }
   }
 }

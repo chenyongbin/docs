@@ -1,4 +1,10 @@
 export default {
-  sidebar: "col-2 col-xl-1",
-  content: "col-10 col-xl-11"
+  /**
+   * 侧边栏
+   */
+  sidebar: "col-3 col-xl-2",
+  /**
+   * 内容
+   */
+  content: "col-9 col-xl-10"
 };

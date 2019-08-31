@@ -1,19 +1,17 @@
 import React from "react";
 import { Http } from "../utils";
 import { Layout } from "../variables";
+import Loading from "./Loading";
 
 export default class Content extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = { html: "" };
-    this.httpInstance = new Http();
-  }
+  httpInstance = new Http();
+  state = { html: "", loading: true };
 
   componentDidMount() {
     this.httpInstance
       .getSlim("logs/dev1.md")
-      .then(({ Data: html }) => this.setState({ html }));
+      .then(({ Data: html }) => this.setState({ html, loading: false }))
+      .catch(() => this.setState({ loading: false }));
   }
 
   componentWillUnmount() {
@@ -24,10 +22,15 @@ export default class Content extends React.Component {
   }
 
   render() {
+    let { loading, html } = this.state;
+    if (loading) {
+      return <Loading />;
+    }
+
     return (
       <div className={`${Layout.content} docs-content`}>
         <div className="bg-light">
-          <pre>{this.state.html}</pre>
+          <pre>{html}</pre>
         </div>
       </div>
     );

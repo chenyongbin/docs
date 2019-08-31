@@ -6,8 +6,10 @@ import React from "react";
 export default class Loading extends React.PureComponent {
   render() {
     return (
-      <div className="w-100 h-100 d-flex docs-loading">
-        <div>{this.props.message || "加载中"}</div>
+      <div className="flex-grow-1 row align-items-center docs-loading">
+        <div className="col text-center">
+          {(this.props.message || "加载中") + "..."}
+        </div>
       </div>
     );
   }
