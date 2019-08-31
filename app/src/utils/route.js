@@ -1,6 +1,6 @@
 let _listening = false,
-  _path = "",
-  _routes = [],
+  _absoluteRoute = false,
+  _route = "",
   _handlers = [];
 
 /**
@@ -16,12 +16,16 @@ export default class Route {
     }
 
     window.onhashchange = ({ newURL, oldURL }) => {
-      _path = location.hash;
-      _path && (_path = _path.substr(1));
-      _routes = _path.split("/");
+      _route = location.hash;
+      _route && (_route = _route.substr(1));
+      _absoluteRoute = /\.(json|md)$/i.test(_route);
 
       for (let handler of _handlers) {
-        handler && handler(_routes);
+        try {
+          handler && handler(_absoluteRoute, _route);
+        } catch (error) {
+          console.log(`ROUTE_ONHASHCHANGE_ERROR`, error);
+        }
       }
     };
     _listening = true;
@@ -32,12 +36,14 @@ export default class Route {
    */
   static stop() {
     window.onhashchange = null;
-    _routes = null;
     _handlers = null;
   }
 
   /**
    * 订阅路由变化处理器
+   * 处理器函数会接收到两个参数：
+   * absoluteRoute: 是否是绝对路由
+   * route：路由
    * @param {function} handler 路由变化处理器
    */
   static subscribeRouteChange(handler) {

@@ -1,20 +1,29 @@
 import React from "react";
 import { Navigation, Sidebar, Content, Loading } from "./components";
-import { Route } from "./utils";
-import { Tips } from "./variables";
+import { Http, Route } from "./utils";
+import { Tips, Project } from "./variables";
 import "./sass/index.scss";
 
+/**
+ * App组件
+ */
 export default class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.getData = this.getData.bind(this);
-    this.state = { data: null, loading: true };
-  }
+  state = {
+    appLoading: true,
+    navigations: null,
+    subNavigations: null,
+    content: "",
+    contentLoading: false
+  };
+  httpInstance = new Http();
 
   componentDidMount() {
     // 开启路由服务
     Route.start();
-    this.getData();
+    // 注册路由变化处理器
+    Route.subscribeRouteChange(this.onRouteChanged);
+    // 初始化
+    this.initialize();
   }
 
   componentWillUnmount() {
@@ -22,25 +31,82 @@ export default class App extends React.Component {
     Route.stop();
   }
 
-  getData() {
-    setTimeout(() => {
-      this.setState({ loading: false });
-    }, 1000);
-  }
+  /**
+   * 初始化
+   */
+  initialize = () => {
+    return Promise.resolve(
+      (async () => {
+        this.setState({ appLoading: true });
+
+        let { Data: navigations } = await this.httpInstance.getSlim(
+            Project.defaultRoute.navigations
+          ),
+          { Data: content } = await this.httpInstance.getSlim(
+            Project.defaultRoute.readme
+          );
+
+        if (navigations && typeof navigations == "string") {
+          navigations = JSON.parse(navigations);
+        }
+
+        this.setState({ appLoading: false, navigations, content });
+      })()
+    ).catch(() => this.setState({ appLoading: false }));
+  };
+
+  /**
+   * 路由改变时的处理器
+   * @param {boolean} absoluteRoute 是否是绝对路由
+   * @param {string} route 路由地址
+   */
+  onRouteChanged = (absoluteRoute, route) => {
+    return Promise.resolve(
+      (async () => {
+        this.setState({
+          contentLoading: true,
+          subNavigations: null,
+          content: null
+        });
+
+        // 绝对路由时
+        if (absoluteRoute) {
+          let { Data: content } = await this.httpInstance.getSlim(route);
+          this.setState({ contentLoading: false, content });
+          return;
+        }
+
+        // 非绝对路由时
+        let { Data: subNavigations } = await this.httpInstance.getSlim(
+            `${route}/${Project.defaultRoute.navigations}`
+          ),
+          { Data: content } = await this.httpInstance.getSlim(
+            `${route}/${Project.defaultRoute.readme}`
+          );
+        this.setState({ contentLoading: false, subNavigations, content });
+      })()
+    ).catch(() => this.setState({ contentLoading: false }))();
+  };
 
   render() {
-    let { loading, data } = this.state;
+    let {
+      navigations,
+      appLoading,
+      subNavigations,
+      content,
+      contentLoading
+    } = this.state;
 
-    if (loading) {
+    if (appLoading) {
       return <Loading message={Tips.loading.app} />;
     }
 
     return (
       <React.Fragment>
-        <Navigation />
+        <Navigation data={navigations} />
         <div className="row flex-grow-1 docs-container">
-          <Sidebar />
-          <Content />
+          <Sidebar data={subNavigations} />
+          <Content loading={contentLoading} data={content} />
         </div>
       </React.Fragment>
     );

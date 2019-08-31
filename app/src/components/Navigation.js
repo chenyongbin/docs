@@ -4,38 +4,27 @@ import ProjectReposity from "./ProjectReposity";
 import MyAvatar from "../images/avatar.jpg";
 import { Project } from "../variables";
 /**
- * 导航组件
- */
+* 导航组件
+* 数据示例：
+* [
+    {
+      title: "读书笔记",
+      route: "/notes",
+      data: [
+        { title: "JavaScript", route: "/notes/js" },
+        { title: "C#", route: "/notes/csharp" },
+        { title: "Python", route: "/notes/python" }
+      ]
+    },
+    { title: "Java", route: "java" },
+    { title: "算法", route: "algorithm" }
+  ]
+*/
 export default class Navigation extends React.PureComponent {
-  state = { data: null };
-
-  componentDidMount() {
-    this.getData();
-  }
-
-  getData = () => {
-    setTimeout(() => {
-      this.setState({
-        data: [
-          {
-            title: "读书笔记",
-            route: "/notes",
-            data: [
-              { title: "JavaScript", route: "/notes/js" },
-              { title: "C#", route: "/notes/csharp" },
-              { title: "Python", route: "/notes/python" }
-            ]
-          },
-          { title: "Java", route: "java" },
-          { title: "算法", route: "algorithm" }
-        ]
-      });
-    }, 100);
-  };
-
   render() {
     let navs = null,
-      { data } = this.state;
+      { data } = this.props;
+
     if (data && data.length > 0) {
       navs = (
         <ul className="navbar-nav mr-auto">
