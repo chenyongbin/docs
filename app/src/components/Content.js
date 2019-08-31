@@ -26,7 +26,7 @@ export default class Content extends React.Component {
   render() {
     return (
       <div className={`${Layout.content} docs-content`}>
-        <div className="mt-4 bg-light">
+        <div className="bg-light">
           <pre>{this.state.html}</pre>
         </div>
       </div>
