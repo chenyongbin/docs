@@ -1,5 +1,11 @@
 import React from "react";
-import { Navigation, Sidebar, Content, Loading } from "./components";
+import {
+  Navigation,
+  Sidebar,
+  Content,
+  Loading,
+  RootSiblingContainer
+} from "./components";
 import { Http, Route } from "./utils";
 import { Tips, Project } from "./variables";
 import "./sass/index.scss";
@@ -85,7 +91,7 @@ export default class App extends React.Component {
           );
         this.setState({ contentLoading: false, subNavigations, content });
       })()
-    ).catch(() => this.setState({ contentLoading: false }))();
+    ).catch(() => this.setState({ contentLoading: false }));
   };
 
   render() {
@@ -108,6 +114,7 @@ export default class App extends React.Component {
           <Sidebar data={subNavigations} />
           <Content loading={contentLoading} data={content} />
         </div>
+        <RootSiblingContainer />
       </React.Fragment>
     );
   }

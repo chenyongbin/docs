@@ -15,5 +15,9 @@ export default {
      * 说明文件 README.md
      */
     readme: "README.md"
-  }
+  },
+  /**
+   * 全局Modal的id
+   */
+  modalId: "docsAppModal"
 };

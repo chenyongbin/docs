@@ -3,6 +3,7 @@ import React from "react";
 import ProjectReposity from "./ProjectReposity";
 import MyAvatar from "../images/avatar.jpg";
 import { Project } from "../variables";
+
 /**
 * 导航组件
 * 数据示例：
@@ -36,8 +37,8 @@ export default class Navigation extends React.PureComponent {
     }
 
     return (
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark docs-navigation">
-        <a className="navbar-brand" href="#">
+      <nav className="navbar navbar-expand-sm navbar-dark bg-dark docs-navigation">
+        <a className="navbar-brand" href="#" onClick={removeAllActive}>
           <img className="avatar" src={MyAvatar} alt="我的头像" />
         </a>
         <button
@@ -65,7 +66,7 @@ export default class Navigation extends React.PureComponent {
  */
 class NavItem extends React.PureComponent {
   onClick = e => {
-    $(".docs-navigation .nav-item").removeClass("active");
+    removeAllActive();
     $(e.currentTarget).addClass("active");
   };
 
@@ -105,3 +106,10 @@ class NavItem extends React.PureComponent {
     );
   }
 }
+
+/**
+ * 删除所有激活的导航
+ */
+const removeAllActive = () => {
+  $(".docs-navigation .nav-item").removeClass("active");
+};

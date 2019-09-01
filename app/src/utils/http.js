@@ -103,17 +103,15 @@ export default class Http {
   async getSlim(route) {
     let rejectReason = "",
       svr = Http.getSvr(),
-      url = "",
       result = null;
 
     try {
-      if (!/\/$/.test(svr) && !/^\//.test(route)) {
-        url = `${svr}/${route}`;
-      } else {
-        url = svr + route;
-      }
-      result = await this.get(url);
-      console.log(url, result);
+      let svrHasSlash = /\/$/.test(svr),
+        routeHasSlash = /^\//.test(route);
+
+      svrHasSlash && (svr = svr.substr(0, svr.length - 1));
+      routeHasSlash && (route = route.substr(1));
+      result = await this.get(`${svr}/${route}`);
 
       if (result) {
         let { Status: status, Message: message } = result;

@@ -47,7 +47,10 @@ export default class Route {
    * @param {function} handler 路由变化处理器
    */
   static subscribeRouteChange(handler) {
-    if (!handler || typeof handler != "function") {
+    if (
+      !handler ||
+      (typeof handler != "function" && _handlers.indexOf(handler) != -1)
+    ) {
       return;
     }
     _handlers.push(handler);
