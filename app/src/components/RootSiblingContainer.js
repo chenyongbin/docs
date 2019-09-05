@@ -3,18 +3,6 @@ import React from "react";
 const dispatches = [];
 
 /**
- * 占位组件
- */
-class PlaceholderComponent extends React.PureComponent {
-  render() {
-    if (this.props.children) {
-      return <React.Fragment>{this.props.children}</React.Fragment>;
-    }
-    return null;
-  }
-}
-
-/**
  * 根组件容器
  */
 export default class RootSiblingContainer extends React.Component {
@@ -41,7 +29,7 @@ export default class RootSiblingContainer extends React.Component {
     return (
       <React.Fragment>
         {[...this._siblings.values()].map((item, index) => (
-          <PlaceholderComponent key={index}>{item}</PlaceholderComponent>
+          <React.Fragment key={index}>{item}</React.Fragment>
         ))}
       </React.Fragment>
     );
