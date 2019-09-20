@@ -4,79 +4,66 @@ import { Project } from "../variables";
 /**
  * 对话框
  */
-export default class Dialog extends React.PureComponent {
-  $modal = $(`#${Project.modalId}`);
+export default function Dialog({
+  visible,
+  title = "温馨提示",
+  message,
+  okButtonText = "确定",
+  cancelButtonText,
+  onOk,
+  onCancel
+}) {
+  if (!visible) {
+    return null;
+  }
 
-  onOk = e => {
-    this.$modal.modal("hide");
-    this.props.onCancel && this.props.onOk();
-  };
+  const $modal = $(`#${Project.modalId}`),
+    onOkHandler = e => {
+      $modal.modal("hide");
+      onOk && onOk();
+    },
+    onCancelHandler = e => {
+      $modal.modal("hide");
+      onCancel && onCancel();
+    };
 
-  onCancel = e => {
-    this.$modal.modal("hide");
-    this.props.onCancel && this.props.onCancel();
-  };
-
-  render() {
-    if (!this.props.visible) {
-      return null;
-    }
-
-    let okButton = null,
-      cancelButton = null,
-      {
-        title = "温馨提示",
-        message,
-        okButtonText = "确定",
-        cancelButtonText
-      } = this.props;
-
-    okButton = (
+  return (
+    <div
+      id={Project.modalId}
+      className="modal fade"
+      tabIndex="-1"
+      data-backdrop="static"
+      role="dialog"
+    >
       <div
-        className="flex-grow-1 p-3 text-center"
-        data-dismiss="modal"
-        onClick={this.onOk}
+        className="modal-dialog modal-sm modal-dialog-centered"
+        role="document"
       >
-        {okButtonText}
-      </div>
-    );
-
-    if (cancelButtonText) {
-      cancelButton = (
-        <div
-          className="flex-grow-1 p-3 text-center border-right border-light"
-          data-dismiss="modal"
-          onClick={this.onCancel}
-        >
-          {cancelButtonText}
-        </div>
-      );
-    }
-
-    return (
-      <div
-        id={Project.modalId}
-        className="modal fade"
-        tabIndex="-1"
-        data-backdrop="static"
-        role="dialog"
-      >
-        <div
-          className="modal-dialog modal-sm modal-dialog-centered"
-          role="document"
-        >
-          <div className="modal-content">
-            <div className="modal-header p-0 justify-content-center">
-              <h5 className="mb-0 p-3 text-center">{title}</h5>
-            </div>
-            <div className="modal-body text-center">{message || ""}</div>
-            <div className="modal-footer p-0 justify-content-center">
-              {cancelButton}
-              {okButton}
+        <div className="modal-content">
+          <div className="modal-header p-0 justify-content-center">
+            <h5 className="mb-0 p-3 text-center">{title}</h5>
+          </div>
+          <div className="modal-body text-center">{message || ""}</div>
+          <div className="modal-footer p-0 justify-content-center">
+            {!cancelButtonText ? null : (
+              <div
+                className="flex-grow-1 p-3 text-center border-right border-light"
+                data-dismiss="modal"
+                onClick={onCancelHandler}
+              >
+                {cancelButtonText}
+              </div>
+            )}
+            <div
+              className="flex-grow-1 p-3 text-center"
+              data-dismiss="modal"
+              onClick={onOkHandler}
+            >
+              {okButtonText}
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

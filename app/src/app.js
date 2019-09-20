@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Navigation,
   Sidebar,
@@ -10,45 +10,30 @@ import { Http, Route } from "./utils";
 import { Tips, Project } from "./variables";
 import "./sass/index.scss";
 
+let httpInstance = null;
+
 /**
  * App组件
  */
-export default class App extends React.Component {
-  state = {
-    appLoading: true,
-    navigations: null,
-    subNavigations: null,
-    content: "",
-    contentLoading: false
-  };
-  httpInstance = new Http();
-
-  componentDidMount() {
-    // 开启路由服务
-    Route.start();
-    // 注册路由变化处理器
-    Route.subscribeRouteChange(this.onRouteChanged);
-    // 初始化
-    this.initialize();
-  }
-
-  componentWillUnmount() {
-    // 停止路由服务
-    Route.stop();
-  }
+export default function App() {
+  const [appLoading, setAppLoading] = useState(true),
+    [navigations, setNavigations] = useState(null),
+    [subNavigations, setSubNavigations] = useState(null),
+    [content, setContent] = useState(""),
+    [contentLoading, setContentLoading] = useState(false);
 
   /**
    * 初始化
    */
-  initialize = () => {
+  const initialize = () => {
     return Promise.resolve(
       (async () => {
-        this.setState({ appLoading: true });
+        setAppLoading(true);
 
-        let { Data: navigations } = await this.httpInstance.getSlim(
+        let { Data: navigations } = await httpInstance.getSlim(
             Project.defaultRoute.navigations
           ),
-          { Data: content } = await this.httpInstance.getSlim(
+          { Data: content } = await httpInstance.getSlim(
             Project.defaultRoute.readme
           );
 
@@ -56,9 +41,11 @@ export default class App extends React.Component {
           navigations = JSON.parse(navigations);
         }
 
-        this.setState({ appLoading: false, navigations, content });
+        setAppLoading(false);
+        setNavigations(navigations);
+        setContent(content);
       })()
-    ).catch(() => this.setState({ appLoading: false }));
+    ).catch(() => setAppLoading(false));
   };
 
   /**
@@ -66,56 +53,66 @@ export default class App extends React.Component {
    * @param {boolean} absoluteRoute 是否是绝对路由
    * @param {string} route 路由地址
    */
-  onRouteChanged = (absoluteRoute, route) => {
+  const onRouteChanged = (absoluteRoute, route) => {
     return Promise.resolve(
       (async () => {
-        this.setState({
-          contentLoading: true,
-          subNavigations: null,
-          content: null
-        });
+        setAppLoading(true);
+        setNavigations(null);
+        setContent("");
 
         // 绝对路由时
         if (absoluteRoute) {
-          let { Data: content } = await this.httpInstance.getSlim(route);
-          this.setState({ contentLoading: false, content });
+          let { Data: content } = await httpInstance.getSlim(route);
+          setContentLoading(false);
+          setContent(content);
           return;
         }
 
         // 非绝对路由时
-        let { Data: subNavigations } = await this.httpInstance.getSlim(
+        let { Data: subNavigations } = await httpInstance.getSlim(
             `${route}/${Project.defaultRoute.navigations}`
           ),
-          { Data: content } = await this.httpInstance.getSlim(
+          { Data: content } = await httpInstance.getSlim(
             `${route}/${Project.defaultRoute.readme}`
           );
-        this.setState({ contentLoading: false, subNavigations, content });
+        setContentLoading(false);
+        setSubNavigations(subNavigations);
+        setContent(content);
       })()
-    ).catch(() => this.setState({ contentLoading: false }));
+    ).catch(() => setContentLoading(false));
   };
 
-  render() {
-    let {
-      navigations,
-      appLoading,
-      subNavigations,
-      content,
-      contentLoading
-    } = this.state;
+  useEffect(function() {
+    // 初始化http实例
+    httpInstance = new Http();
+    // 开启路由服务
+    Route.start();
+    // 注册路由变化处理器
+    Route.subscribeRouteChange(onRouteChanged);
+    // 初始化
+    initialize();
 
-    if (appLoading) {
-      return <Loading message={Tips.loading.app} />;
-    }
+    return function() {
+      // 停止路由服务
+      Route.stop();
+      // 销毁http实例
+      httpInstance = null;
+      console.log('unmount');
+    };
+  }, []);
 
-    return (
-      <React.Fragment>
-        <Navigation data={navigations} />
-        <div className="row flex-grow-1 docs-container">
-          <Sidebar data={subNavigations} />
-          <Content loading={contentLoading} data={content} />
-        </div>
-        <RootSiblingContainer />
-      </React.Fragment>
-    );
+  if (appLoading) {
+    return <Loading message={Tips.loading.app} />;
   }
+
+  return (
+    <React.Fragment>
+      <Navigation data={navigations} />
+      <div className="row flex-grow-1 docs-container">
+        <Sidebar data={subNavigations} />
+        <Content loading={contentLoading} data={content} />
+      </div>
+      <RootSiblingContainer />
+    </React.Fragment>
+  );
 }

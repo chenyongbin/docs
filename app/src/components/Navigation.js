@@ -21,90 +21,83 @@ import { Project } from "../variables";
     { title: "算法", route: "algorithm" }
   ]
 */
-export default class Navigation extends React.PureComponent {
-  render() {
-    let navs = null,
-      { data } = this.props;
+export default function Navigation({ data }) {
+  let navs = null;
 
-    if (data && data.length > 0) {
-      navs = (
-        <ul className="navbar-nav mr-auto">
-          {data.map((item, index) => (
-            <NavItem key={index} {...item} />
-          ))}
-        </ul>
-      );
-    }
-
-    return (
-      <nav className="navbar navbar-expand-sm navbar-dark bg-dark docs-navigation">
-        <a className="navbar-brand" href="#" onClick={removeAllActive}>
-          <img className="avatar" src={MyAvatar} alt="我的头像" />
-        </a>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarContent"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-
-        <div className="collapse navbar-collapse" id="navbarContent">
-          {navs}
-          <ul className="navbar-nav flex-row ml-auto docs-navigation-right">
-            <ProjectReposity url={Project.reposity} />
-          </ul>
-        </div>
-      </nav>
+  if (data && data.length > 0) {
+    navs = (
+      <ul className="navbar-nav mr-auto">
+        {data.map((item, index) => (
+          <NavItem key={index} {...item} />
+        ))}
+      </ul>
     );
   }
+
+  return (
+    <nav className="navbar navbar-expand-sm navbar-dark bg-dark docs-navigation">
+      <a className="navbar-brand" href="#" onClick={removeAllActive}>
+        <img className="avatar" src={MyAvatar} alt="我的头像" />
+      </a>
+      <button
+        className="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarContent"
+      >
+        <span className="navbar-toggler-icon"></span>
+      </button>
+
+      <div className="collapse navbar-collapse" id="navbarContent">
+        {navs}
+        <ul className="navbar-nav flex-row ml-auto docs-navigation-right">
+          <ProjectReposity url={Project.reposity} />
+        </ul>
+      </div>
+    </nav>
+  );
 }
 
 /**
  * 导航项
  */
-class NavItem extends React.PureComponent {
-  onClick = e => {
+function NavItem({ title, route, data }) {
+  const onClick = e => {
     removeAllActive();
     $(e.currentTarget).addClass("active");
   };
 
-  render() {
-    let { title, route, data } = this.props;
-
-    // 有下拉选项时
-    if (data && data.length > 0) {
-      return (
-        <li className="nav-item dropdown" onClick={e => this.onClick(e)}>
-          <a
-            className="nav-link dropdown-toggle"
-            href={`#${route}`}
-            role="button"
-            data-toggle="dropdown"
-          >
-            {title}
-          </a>
-          <div className="dropdown-menu">
-            {data.map((item, index) => (
-              <a key={index} className="dropdown-item" href={`#${item.route}`}>
-                {item.title}
-              </a>
-            ))}
-          </div>
-        </li>
-      );
-    }
-
+  if (!data || data.length == 0) {
     // 没有下拉选项时
     return (
-      <li className="nav-item" onClick={e => this.onClick(e)}>
+      <li className="nav-item" onClick={onClick}>
         <a className="nav-link" href={`#${route}`}>
           {title}
         </a>
       </li>
     );
   }
+
+  // 有下拉选项时
+  return (
+    <li className="nav-item dropdown" onClick={onClick}>
+      <a
+        className="nav-link dropdown-toggle"
+        href={`#${route}`}
+        role="button"
+        data-toggle="dropdown"
+      >
+        {title}
+      </a>
+      <div className="dropdown-menu">
+        {data.map((item, index) => (
+          <a key={index} className="dropdown-item" href={`#${item.route}`}>
+            {item.title}
+          </a>
+        ))}
+      </div>
+    </li>
+  );
 }
 
 /**
