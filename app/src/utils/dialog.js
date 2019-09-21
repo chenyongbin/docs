@@ -15,7 +15,7 @@ const showModal = () => {
 /**
  * 打开对话框
  */
-export default (message, options) => {
+export default (message, options = {}) => {
   let props = Object.assign({}, options, { visible: true, message });
 
   props.onOk = () => {

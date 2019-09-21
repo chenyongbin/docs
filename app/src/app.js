@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import {
   Navigation,
   Sidebar,
@@ -41,11 +41,10 @@ export default function App() {
           navigations = JSON.parse(navigations);
         }
 
-        setAppLoading(false);
         setNavigations(navigations);
         setContent(content);
       })()
-    ).catch(() => setAppLoading(false));
+    ).finally(() => setAppLoading(false));
   };
 
   /**
@@ -56,14 +55,12 @@ export default function App() {
   const onRouteChanged = (absoluteRoute, route) => {
     return Promise.resolve(
       (async () => {
-        setAppLoading(true);
-        setNavigations(null);
+        setContentLoading(true);
         setContent("");
 
         // 绝对路由时
         if (absoluteRoute) {
           let { Data: content } = await httpInstance.getSlim(route);
-          setContentLoading(false);
           setContent(content);
           return;
         }
@@ -75,11 +72,12 @@ export default function App() {
           { Data: content } = await httpInstance.getSlim(
             `${route}/${Project.defaultRoute.readme}`
           );
-        setContentLoading(false);
         setSubNavigations(subNavigations);
         setContent(content);
       })()
-    ).catch(() => setContentLoading(false));
+    ).finally(() => {
+      setContentLoading(false);
+    });
   };
 
   useEffect(function() {
@@ -97,7 +95,6 @@ export default function App() {
       Route.stop();
       // 销毁http实例
       httpInstance = null;
-      console.log('unmount');
     };
   }, []);
 
@@ -106,13 +103,13 @@ export default function App() {
   }
 
   return (
-    <React.Fragment>
+    <Fragment>
       <Navigation data={navigations} />
       <div className="row flex-grow-1 docs-container">
         <Sidebar data={subNavigations} />
         <Content loading={contentLoading} data={content} />
       </div>
       <RootSiblingContainer />
-    </React.Fragment>
+    </Fragment>
   );
 }

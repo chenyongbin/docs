@@ -3,7 +3,7 @@ import React from "react";
 /**
  * 项目仓库组件
  */
-export default function ProjectReposity({ url }) {
+export default function ProjectReposity({ url } = {}) {
   return (
     <li className="nav-item">
       <a className="nav-link p-2" href={url}>

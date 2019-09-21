@@ -21,7 +21,7 @@ import { Project } from "../variables";
     { title: "算法", route: "algorithm" }
   ]
 */
-export default function Navigation({ data }) {
+export default function Navigation({ data } = {}) {
   let navs = null;
 
   if (data && data.length > 0) {

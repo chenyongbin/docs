@@ -12,7 +12,7 @@ export default function Dialog({
   cancelButtonText,
   onOk,
   onCancel
-}) {
+} = {}) {
   if (!visible) {
     return null;
   }
