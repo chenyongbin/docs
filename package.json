@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "listen": "node app/server/app.js",
-    "build-navigations": "node app/scripts/build-navigations.js",
-    "build-dev": "cross-env NODE_ENV=development webpack-dev-server --open --config webpack.config.js",
-    "builld-prod": "cross-env NODE_ENV=production webpack --config webpack.config.js",
-    "build": "npm run build-navigations && npm run build-dev",
-    "release": "npm run build-navigations && npm run build-prod",
+    "docs": "node app/scripts/build-navigations.js",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --config webpack.config.js",
+    "prod": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "build": "npm run docs && npm run dev",
+    "release": "npm run docs && npm run prod",
     "start": "npm run listen & npm run build"
   },
   "repository": {

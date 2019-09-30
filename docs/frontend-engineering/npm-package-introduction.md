@@ -1,4 +1,4 @@
-# npm中`package.json`文件介绍
+# npm 中`package.json`文件介绍
 
 所有配置字段如下：
 
@@ -22,7 +22,24 @@
     "files": [""],
     "main": "",
     "browser": "",
-    "bin": ""
+    "bin": "",
+    "man": "",
+    "directories": "",
+    "repository": "",
+    "scripts": "",
+    "config": "",
+    "dependencies": "",
+    "devDependecies": "",
+    "peerDependencies": "",
+    "bundledDependencies": "",
+    "optionalDependecies": "",
+    "engines": "",
+    "engineStrict": "",
+    "os": "",
+    "cpu":"",
+    "preferGlobal": "",
+    "private": "",
+    "publicConfig": "",
 }
 ```
 
@@ -131,28 +148,157 @@
 
 ## `browser`
 
-如果你的项目用于使用客户端，那么应该使用`browser`字段而不是`main`，这在提示用户可以依赖一些在`node`中没有的元数据（如`window`）时很有用。  
+如果你的项目用于使用客户端，那么应该使用`browser`字段而不是`main`，这在提示用户可以依赖一些在`node`中没有的元数据（如`window`）时很有用。
 
-## `bin`  
+## `bin`
 
-很多包里会有一到多个可能要安装到`PATH`中的可执行文件。可以添加`bin`字段，该字段映射了命令名和它的本地文件名。  
+很多包里会有一到多个可能要安装到`PATH`中的可执行文件。可以添加`bin`字段，该字段映射了命令名和它的本地文件名。
 
-示例如下：  
-```js  
+示例如下：
+
+```js
 {
     "bin": {"myApp", "/cli.js"}
 }
-```  
+```
 
-若命令名和项目名一致时，可以省略命令名，直接配置命令文件  
-```js  
+若命令名和项目名一致时，可以省略命令名，直接配置命令文件
+
+```js
 {
     "bin": "./cli.js"
 }
+```
+
+## `man`
+
+为`man`命令程序指定单个文件或一个文件数组。
+
+如果指定单个文件，结果会执行命令`man <pkgname>`，也就是无视具体文件名称，而以项目名作为参数。
+
+```js
+{
+    "name": "foo",
+    "man": "./man/doc.1"
+}
+
+// 结果命令是 man foo
+```
+
+如果指定多个文件，且没有以包文件名开头时，会将包名称以前缀形式添加到命令中。
+
+```js
+{
+    "name": "foo",
+    "man": ["./man/foo.1", "./man/bar.1"]
+}
+// 结果命令是 man foo和 man foo-bar
+```
+
+## `directories`
+
+该字段是`CommonJS`规范用来详细描述包结构的。
+
+- `directories.lib` 描述库文件主体的位置
+- `directories.bin` 设置该属性后，该文件夹下的所有文件都会添加。该属性不可以和`bin`同时使用
+- `directories.man` 一个有所有`man`命令的文件夹
+- `directories.doc` markdown 文件夹
+- `directories.example` 示例脚本
+- `directories.test` 测试
+
+## `repository`
+
+代码仓库地址，如果是`Github`地址，使用`npm docs`命令可以直接跳至仓库页面。
+
+## `scripts`
+
+配置脚本命令，详情点击 [npm-scripts](https://docs.npmjs.com/misc/scripts)
+
+## `config`
+
+该字段用于设置脚本中跨升级使用的配置参数。如：
+
+```js
+{
+    "config": {"port": "8080"}
+}
+// 可以使用process.env.npm_package_config_port的形式获取到该值
+```
+
+## `dependencies`
+
+该字段是一个简单对象，使用包名称和版本号序列映射，指定了项目的依赖。版本序列是一个有一到多个空格分隔符的字符串。
+
+版本号如`[major, minor, patch]`，简要介绍如下：
+
+- `major` 这个版本号变化了表示有了一个不可以和上个版本兼容的大更改
+- `minor` 这个版本号变化了表示有了增加了新的功能，并且可以向后兼容
+- `patch` 这个版本号变化了表示修复了 bug，并且可以向后兼容
+
+可能的格式如下：
+
+- `version` 精确匹配某个版本
+- `>version` 大于某个版本
+- `>=version` 大于等于某个版本
+- `<version` 小于某个版本
+- `<=version` 小于等于某个版本
+- `~version` 大约等于某个版本，更新至`patch`的最新版
+- `^version` 兼容某个版本，更新至`minor`的最新版
+- `1.2.x` 会是 1.2.0、1.2.1 但不是 1.3.0
+- `http://...` http 地址
+- `*` 匹配任何版本
+- 空字符串时，同`*`
+- `version1 - version2` 大于等于`version1`，小于等于`version2`
+- `range1 || range2` 满足序列 1 或序列 2
+- `git...` git 地址
+- `user/repo` GitHub 地址
+- `tag` 一个指定版本的标签并发布为`tag`
+- `path/path/path` 本地路径下的包
+
+### 用 URL 地址做依赖
+
+指定一个 url 地址作为版本序列，在 npm 安装时会将其下载到本地。
+
+### 用 Git URLs 做依赖
+
+Git URLs 格式如下：
+
+```
+<protocol>://[<user>[:<password>]@]<hostname>[:<port>][:][/]<path>[#<commit-ish> | #semver:<semver>]
+```
+
+示例：
+
+```sh
+git+ssh://git@github.com:npm/cli.git#v1.0.27
+git+ssh://git@github.com:npm/cli#semver:^5.0
+git+https://isaacs@github.com/npm/cli.git
+git://github.com/npm/cli.git#v1.0.27
+```
+
+### 用 Github URLs 做依赖
+
+格式是`user/repo`，如:
+
+```sh
+{
+    "express": "expressjs/express",
+    "mocha": "mochajs/mocha#4727d357ea",
+    "module": "user/repo#feature\/branch"
+}
+```
+
+### 用本地路径做依赖
+
+可以用`npm install -S`和`npm install --save`保存到本地，使用示例：  
+```sh  
+../foo/bar
+~/foo/bar
+./foo/bar
+/foo/bar
 ```  
 
-## `man`  
+这些都是`package.json`的相对路径。  
 
-为`man`命令程序指定单个文件或一个文件数组。  
 
-如果指定单个文件
+## `devDenpencies`  
