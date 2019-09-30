@@ -1,7 +1,7 @@
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
-const { listenPort } = require("../config");
+const { listenPort } = require("../constants");
 
 const app = express();
 

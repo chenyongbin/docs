@@ -19,7 +19,7 @@ console.log("\n");
 
 const webpackConfig = {
   mode: envName,
-  context: path.resolve(process.cwd(), "app", "src"),
+  context: path.resolve(process.cwd(), "app", "client"),
   entry: "./index.js",
   output: {
     path: isDevelopment
