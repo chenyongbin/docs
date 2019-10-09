@@ -301,4 +301,78 @@ git://github.com/npm/cli.git#v1.0.27
 这些都是`package.json`的相对路径。  
 
 
-## `devDenpencies`  
+## `devDepencies`  
+
+如果一些人试图在他们的程序中下载你的项目，但又可能不想安装和编译你使用的外部测试和文档框架。  
+
+此时，可以将这些额外的项目映射放在`devDepencies`对象中。  
+
+可以通过 `npm link` 或 `npm install` 安装这些依赖，并且像其它npm配置参数一样管理。  
+
+## `peerDepencies`  
+
+某些情况下，你想表达你的包对应的宿主工具或库的兼容性，而不必使用`require`引用该宿主。这个通常称之为插件。尤其是，你的模块或许会暴露一个被宿主文档期待和指定的接口。  
+
+假如你的包配置如下：  
+```js  
+{
+    "name": "tea-latte",
+    "version": "1.3.5",
+    "peerDepencies": {
+        "tea": "2.x"
+    }
+}
+```  
+像这种情况，通过命令`npm install tea-latte`安装完包时，会产品如下的依赖图：  
+```js  
+|--- tea-latte@1.3.5
+|--- tea@2.2.0
+```  
+
+## `bundledDepencies`  
+
+这个属性定义了一个包名称数组，在发布时用以打包。  
+
+当你将包保留在本地，或是使其以单个文件形式下载时，可以通过在`bundledDependecies`属性中指定包名称，并执行`npm pack`，将其打包进一个tar文件。  
+
+## `optionalDependecies`  
+
+可选依赖，下载该依赖失败后也不会报错。该属性中的依赖会覆盖`depencies`中的依赖，因此最好只使用一个。  
+
+## `engines`  
+
+指定`node`和`npm`的版本。  
+
+## `engineStrict`  
+
+npm3.0以后已移除
+
+## `OS`  
+
+模块运行系统，可以是白名单或和黑名单形式。操作系统由`process.platform`指定。  
+
+白名单形式如：  
+```js  
+    "os": ["darwin", "linux"]  
+```  
+
+黑名单形式如：  
+```js  
+    "os": ["!win32"]
+```
+
+## `cpu`  
+
+指定特定的cpu架构，同`os`属性一样也有白名单、黑名单之分。由`process.arch`指定。  
+
+## `preferGlobal`  
+
+*已废弃*
+
+## `private`  
+
+确保不会突然发布到npm仓库中的设置。如果该属性设为`true`，npm会拒绝发布。  
+
+## `publishConfig`  
+
+一系列用于发布时的配置。
