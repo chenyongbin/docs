@@ -43,7 +43,7 @@
 }
 ```
 
-## `name`
+## name
 
 项目名称，发布时，该字段是必需的，若不发布时是可选的。该字段需遵循一些规则：
 
@@ -59,31 +59,31 @@
 - 名称可能会被`reuire()`调用，所以应尽可能短且易于理解
 - 如果要发布时，最好先检查一下 npm 库中是否已有该名称的模块
 
-## `version`
+## version
 
 版本号，发布时，该字段是必需的，若不发布时是可选的。使用`npm`打包时，该字段的值必须遵循[node-semver](https://docs.npmjs.com/misc/semver)规范。
 
-## `description`
+## description
 
 项目描述字符串
 
-## `keywords`
+## keywords
 
 项目关键字，是一个字符串数组
 
-## `homepage`
+## homepage
 
 项目首页地址
 
-## `bugs`
+## bugs
 
 项目的问题追踪地址或者是报告问题时的邮件地址，可以指定`url`和`email`两个值，也可以只指定一个。
 
-## `lisence`
+## lisence
 
 开源许可证
 
-## `author`
+## author
 
 作者，可以使用一个对象展示名称、url 和 email
 
@@ -101,11 +101,11 @@
 "Albin <chenyongbin.github.com> (chenyongbin@outlook.com)"
 ```
 
-## `contributors`
+## contributors
 
 作者信息数组，数组项格式同`author`
 
-## `files`
+## files
 
 可选字段，当项目被用作依赖时，用于描述包含文件的文件模式。该文件模式遵循类似`.gitignore`的模式。
 
@@ -142,15 +142,15 @@
 - \*.orig
 - package-lock.json (use shrinkwrap instead)
 
-## `main`
+## main
 
 该字段是用于表示项目开始入口的模块 ID。
 
-## `browser`
+## browser
 
 如果你的项目用于使用客户端，那么应该使用`browser`字段而不是`main`，这在提示用户可以依赖一些在`node`中没有的元数据（如`window`）时很有用。
 
-## `bin`
+## bin
 
 很多包里会有一到多个可能要安装到`PATH`中的可执行文件。可以添加`bin`字段，该字段映射了命令名和它的本地文件名。
 
@@ -170,7 +170,7 @@
 }
 ```
 
-## `man`
+## man
 
 为`man`命令程序指定单个文件或一个文件数组。
 
@@ -195,7 +195,7 @@
 // 结果命令是 man foo和 man foo-bar
 ```
 
-## `directories`
+## directories
 
 该字段是`CommonJS`规范用来详细描述包结构的。
 
@@ -206,15 +206,15 @@
 - `directories.example` 示例脚本
 - `directories.test` 测试
 
-## `repository`
+## repository
 
 代码仓库地址，如果是`Github`地址，使用`npm docs`命令可以直接跳至仓库页面。
 
-## `scripts`
+## scripts
 
 配置脚本命令，详情点击 [npm-scripts](https://docs.npmjs.com/misc/scripts)
 
-## `config`
+## config
 
 该字段用于设置脚本中跨升级使用的配置参数。如：
 
@@ -225,7 +225,7 @@
 // 可以使用process.env.npm_package_config_port的形式获取到该值
 ```
 
-## `dependencies`
+## dependencies
 
 该字段是一个简单对象，使用包名称和版本号序列映射，指定了项目的依赖。版本序列是一个有一到多个空格分隔符的字符串。
 
@@ -301,7 +301,7 @@ git://github.com/npm/cli.git#v1.0.27
 这些都是`package.json`的相对路径。  
 
 
-## `devDepencies`  
+## devDepencies  
 
 如果一些人试图在他们的程序中下载你的项目，但又可能不想安装和编译你使用的外部测试和文档框架。  
 
@@ -309,7 +309,7 @@ git://github.com/npm/cli.git#v1.0.27
 
 可以通过 `npm link` 或 `npm install` 安装这些依赖，并且像其它npm配置参数一样管理。  
 
-## `peerDepencies`  
+## peerDepencies  
 
 某些情况下，你想表达你的包对应的宿主工具或库的兼容性，而不必使用`require`引用该宿主。这个通常称之为插件。尤其是，你的模块或许会暴露一个被宿主文档期待和指定的接口。  
 
@@ -325,29 +325,29 @@ git://github.com/npm/cli.git#v1.0.27
 ```  
 像这种情况，通过命令`npm install tea-latte`安装完包时，会产品如下的依赖图：  
 ```js  
-|--- tea-latte@1.3.5
-|--- tea@2.2.0
+|--- tea-latte@1.3.5  
+|--- tea@2.2.0  
 ```  
 
-## `bundledDepencies`  
+## bundledDepencies  
 
 这个属性定义了一个包名称数组，在发布时用以打包。  
 
 当你将包保留在本地，或是使其以单个文件形式下载时，可以通过在`bundledDependecies`属性中指定包名称，并执行`npm pack`，将其打包进一个tar文件。  
 
-## `optionalDependecies`  
+## optionalDependecies  
 
 可选依赖，下载该依赖失败后也不会报错。该属性中的依赖会覆盖`depencies`中的依赖，因此最好只使用一个。  
 
-## `engines`  
+## engines  
 
 指定`node`和`npm`的版本。  
 
-## `engineStrict`  
+## engineStrict  
 
 npm3.0以后已移除
 
-## `OS`  
+## OS  
 
 模块运行系统，可以是白名单或和黑名单形式。操作系统由`process.platform`指定。  
 
@@ -361,18 +361,18 @@ npm3.0以后已移除
     "os": ["!win32"]
 ```
 
-## `cpu`  
+## cpu  
 
 指定特定的cpu架构，同`os`属性一样也有白名单、黑名单之分。由`process.arch`指定。  
 
-## `preferGlobal`  
+## preferGlobal  
 
 *已废弃*
 
-## `private`  
+## private  
 
 确保不会突然发布到npm仓库中的设置。如果该属性设为`true`，npm会拒绝发布。  
 
-## `publishConfig`  
+## publishConfig  
 
 一系列用于发布时的配置。
