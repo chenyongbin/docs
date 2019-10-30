@@ -27,11 +27,83 @@ let src1: Source1 = { name: "source1" };
 let src2: Souce2 = { name: "source2", age: 12 };
 let p1: Target = src1; // 报错
 let p2: Target = src2; // 正确
-```  
+```
 
 _注意：比较流程会递归进行，浏览类型的每个成员及其子成员。_
 
 ## 比较两个函数
+
+比较两个函数是否兼容的条件，就是比较参数和返回值。
+
+**比较参数**时，只要源函数的所有参数都能在目标参数中找到一一对应参数（只比较参数类型，不关心参数名称），那么就表示参数是兼容的。
+
+```ts
+let x = (a: number) => 0;
+let y = (a: number, b: string) => 0;
+x = y; // 不兼容
+y = x; // 兼容
+```
+
+**比较返回值**时，只要目标函数返回值所有的参数，都能在源参数中找到一一对应的参数，就表示返回值是兼容的。
+
+```ts
+let x = () => ({ name: "Lucy" });
+let y = () => ({ name: "Lily", age: 23 });
+x = y; // 兼容
+y = x; // 不兼容
+```
+
+### 函数参数二元性
+
+当比较函数参数时，如果源参数可以赋值给目标参数或反之，赋值就会成功。这种函数是不可靠的，因为会出现函数声明时有一个比较特殊的参数，但调用时传入的是一个不太特殊的参数。实际上，这种错误很少发生，并且允许这种情况能够使很多常见 JavaScript 范式成为可能。
+
+```ts
+enum EventType {
+  Mouse,
+  Keyboard
+}
+
+interface Event {
+  timestamp: number;
+}
+interface MouseEvent extends Event {
+  x: number;
+  y: number;
+}
+interface KeyEvent extends Event {
+  keyCode: number;
+}
+
+function listenEvent(eventType: EventType, handler: (n: Event) => void) {
+  /* ... */
+}
+
+// 不稳健，但有用且常见
+listenEvent(EventType.Mouse, (e: MouseEvent) => console.log(e.x + "," + e.y));
+
+// 为了稳健性而传入的不太期望的替代参数
+listenEvent(EventType.Mouse, (e: Event) =>
+  console.log((e as MouseEvent).x + "," + (e as MouseEvent).y)
+);
+listenEvent(EventType.Mouse, ((e: MouseEvent) =>
+  console.log(e.x + "," + e.y)) as (e: Event) => void);
+
+// 完全错误、不兼容的参数
+listenEvent(EventType.Mouse, (e: number) => console.log(e));
+```
+
+_注意：上面这些不稳健的写法，在使用`strictFunctionTypes`配置时，编译器会报错。_
+
+### 可选参数和剩余参数
+
+当比较函数兼容性时，可选和必需参数是可互换的。源类型额外的可选参数不是错误，目标类型的可选参数在源类型中没有一一对应参数也不是错误。  
+
+当一个函数有剩余参数时，被视为就好像有无限的可选参数。  
+
+这种情况从类型系统的角度来看可能是不可靠的，但从运行时的角度来看，可选参数没有被严格执行，因为在那个位置传入`undefined`适用于大多数函数。  
+
+### 函数重载  
+当一个函数有重载时，源类型的每一个重载必须在目标类型中找到一个兼容的重载。这会确保目标函数可以像源函数那样在同样的地方被调用。
 
 ## 枚举
 
