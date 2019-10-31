@@ -12,3 +12,4 @@
 * [枚举](enums.md)  
 * [类型推断](type-inference.md)  
 * [类型兼容性](type-compatibility.md)  
+* [高级类型](advanced-types.md)
