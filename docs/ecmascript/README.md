@@ -4,4 +4,5 @@
 - [ECMAScript6 入门](es6tutorial.md)
 - [对象原型](object-prototype.md)  
 - [兼容性方法集锦](compatible-methods.md)  
-- [对象的遍历方法](object-iterate-methods.md)
+- [对象的遍历方法](object-iterate-methods.md) 
+- [同时多次调用一个异步方法的管道处理器](pipeline-for-concurrent-multiple-calls-to-an-async-method.md)
