@@ -1,112 +1,204 @@
-# 同时多次调用一个异步方法的管道处理器
+# 实现同时多次调用一个异步方法时只执行一次异步操作
 
-有这样一种情况：异步方法 `A` 是方法 `B`、`C` 和 `D` 的依赖，`B`、`C` 和 `D` 有可能同时调用 `A`。此时 `A` 中的异步操作会被执行 3 次。假如方法 `A` 返回的结果对时间没有那么敏感的话，`B`、`C` 和 `D` 同时调用 `A` 时得到的结果应该是一致的，所以方法 `A` 中的异步操作只需要调用一次就行了。
+## 背景
 
-那么如何实现在 `B`、`C` 和 `D` 同时调用 `A` 时，`A` 中的异步操作只调用一次呢？答案是在 `A` 中的异步操作第一次被执行时，将其异步对象缓存下来。后续其它几个方法调用 `A` 时，判断 `A` 的异步操作对象是否存在，若存在直接返回该异步对象。结果就是 `B`、`C` 和 `D` 同时调用 `A` 后，得到的是同一个异步对象，等异步操作结束，`B`、`C` 和 `D` 会同时得到相同的结果。
+最近在做`React Native`项目时，遇到一个异步调用问题。接口请求时需要传入明文 id，但是应用从其它地方同步过来的 id 是加密的，所以在调用接口前需要再调一次解密请求，以获取到明文 id。
 
-根据上面的思路，我们可以声明一个功能方法`pipeline`，参数是一个异步方法。该功能方法可以将异步方法进行封装，使其支持在多次调用时，只执行一次异步操作。对 `A` 的调用就好像是对其架设一个管道，同时多次调用只执行一次异步时，就好像这些调用者使用的是同一个管道，所以我将这个功能方法也称之为管道方法。
-
-管道方法的具体实现很简单：就是创建一个匿名函数，在函数内创建一个表示异步对象的变量，然后返回一个新的异步方法。方法内判断异步对象变量是否存在，不存在时执行异步操作，并将异步操作返回的对象赋值给前面的异步对象变量；存在时，直接返回该异步对象变量。等异步操作结束，返回给调用者异步操作结果后，再销毁异步对象变量。这样一次同时多次调用一个异步方法，只执行一次异步操作的管道方法就实现了。
-
-示例：
+问题是，页面初始化后，可能会同时发出多个接口请求。代码逻辑如下：
 
 ```js
-const pipeline = function(targetFunction, shouldCacheResult) {
-  let startedPromise = null;
+// 解密id
+const decryptId = () => fetch("url").then(response => response.json());
 
-  return function() {
-    if (!startedPromise) {
-      startedPromise = new Promise(function(resolve, reject) {
-        targetFunction()
-          .then(function(result) {
-            resolve(result);
-            startedPromise = null;
-          })
-          .catch(function(error) {
-            reject(error);
-            startedPromise = null;
-          });
-      });
-    }
-    return startedPromise;
-  };
+// 接口请求1
+const request1 = async () => {
+  let decryptedId = await decryptId();
+  // ...
+};
+
+// 接口请求2
+const request2 = async () => {
+  let decryptedId = await decryptId();
+  // ...
+};
+
+// 页面初始化后
+request1();
+request2();
+```
+
+结果是`decryptId`中的异步请求执行了两次，造成了不必要的网络请求开销。
+
+## 思路
+
+既然两次调用都是执行相同的操作，为什么不合二为一只做一次解密请求呢？但是如何把两次请求合成一次呢？理想的情况是：当第一次发起了解密请求后，再想发起第二次请求时，因为知道前面已经发起过一次解密请求，所以就不再发起请求，两次解密调用都使用同一个解密请求。
+
+想好了就要验证一下：
+
+```js
+let decryptIdPromise = null;
+
+// 解密id
+const decryptId = () => {
+  if (!decryptIdPromise) {
+    decryptIdPromise = fetch("url").then(response => {
+      decryptIdPromise = null;
+      return response.json();
+    });
+  }
+  return decryptIdPromise;
+};
+
+// 接口请求1
+const request1 = async () => {
+  let decryptedId = await decryptId();
+  // ...
+};
+
+// 接口请求2
+const request2 = async () => {
+  let decryptedId = await decryptId();
+  // ...
+};
+
+// 页面初始化后
+request1();
+request2();
+```
+
+上面代码中，我使用了一个变量`decryptIdPromise`来保存异步请求，接口请求`request1`调用解密方法`decryptId`时，异步请求变量`decryptIdPromise`还是`null`，此时发起解密请求，并将解密异步请求对象赋值给变量`decryptIdPromise`。等接口请求`request2`调用解密方法时，变量`decryptIdPromise`已不为空，解密方法直接将该变量返回，这样两个接口请求方法消费的就是同一个解密请求了。
+
+结果自然如预期的那样，只执行了一次解密请求。
+
+发散思维思考一下如果把解密后的 id 缓存下来会怎样？答案是，下次再解密 id 时就不用发起网络请求了，直接返回缓存的 id。
+
+改造后的解密 id 方法如下：
+
+```js
+let decryptedId = "",
+  decryptIdPromise = null;
+
+// 解密id
+const decryptId = () => {
+  if (decryptedId) {
+    return decryptedId;
+  }
+
+  if (!decryptIdPromise) {
+    decryptIdPromise = fetch("url").then(response => {
+      decryptIdPromise = null;
+      decryptedId = response.json();
+      return decryptedId;
+    });
+  }
+  return decryptIdPromise;
 };
 ```
 
-假如方法异步操作结果在应用生命周期内保持不变，可以将其缓存下来，下次调用时直接返回。
+## 管道方法
 
-有缓存逻辑示例：
+项目中还有类似的场景，那么可以把对异步操作的处理逻辑提取出来，封装成一个功能方法。
+
+对解密方法的两次同时调用，得到的都是同一个异步请求对象。形象一点比喻的话，像是在解密请求上架设了一根管道，两次请求连接的都是这条管道。所以，我把这个功能方法也称之为管道方法。
+
+管道方法代码：
 
 ```js
-const pipeline = function(targetFunction, shouldCacheResult) {
+const pipeline = (targetFunction, shouldCacheResult = false) => {
   let promiseResult = null,
     startedPromise = null;
 
-  if (shouldCacheResult && promiseResult) {
-    return promiseResult;
-  }
-
-  return function() {
-    if (!startedPromise) {
-      startedPromise = new Promise(function(resolve, reject) {
-        targetFunction()
-          .then(function(result) {
-            shouldCacheResult && (promiseResult = result);
-            resolve(result);
-            startedPromise = null;
-          })
-          .catch(function(error) {
-            reject(error);
-            startedPromise = null;
-          });
-      });
+  return () => {
+    if (shouldCacheResult && promiseResult) {
+      return promiseResult;
     }
+
+    if (!startedPromise) {
+      startedPromise = targetFunction()
+        .then(result => {
+          startedPromise = null;
+          return result;
+        })
+        .catch(error => {
+          startedPromise = null;
+          return error;
+        });
+    }
+
     return startedPromise;
   };
 };
 ```
 
-**注意**：针对某些退出应用后，但应用资源仍未得到释放的环境。若要使用缓存结果逻辑，必须在`export`该方法时才用该管道方法进行封装。
+最终上面的解密方法可以改成如下方式：
 
 ```js
-const asyncMethod = async function(){
-    // ...
-};
-
-export {
-    asyncMethod: pipeline(asyncMethod)
-};
+const decryptId = pipeline(
+  () => fetch("url").then(response => response.json()),
+  true
+);
 ```
 
-`TypeScript` 版：
+**注意**：在某些应用退出后，资源仍未释放的环境。若想使用缓存异步结果逻辑，不能使用上面这种方式封装异步方法，而应该在`export`关键字后封装。
+
+```js
+const decryptId = () => fetch("url").then(response => response.json());
+
+export {
+  decryptId: pipeline(decryptId)
+}
+```
+
+`TypeScript`版管道方法：
 
 ```ts
-const pipeline = function<T>(
+const pipeline = <T>(
   targetFunction: () => Promise<T>,
   shouldCacheResult: boolean = false
-) {
+) => {
   let promiseResult: T, startedPromise: Promise<T> | undefined;
 
-  if (shouldCacheResult && promiseResult) {
-    return promiseResult;
-  }
-
-  return function(): Promise<T> {
-    if (!startedPromise) {
-      startedPromise = new Promise(function(resolve, reject) {
-        targetFunction()
-          .then(function(result) {
-            shouldCacheResult && (promiseResult = result);
-            resolve(result);
-            startedPromise = undefined;
-          })
-          .catch(function(error) {
-            reject(error);
-            startedPromise = undefined;
-          });
-      });
+  return (): Promise<T> => {
+    if (shouldCacheResult && promiseResult) {
+      return promiseResult;
     }
+
+    if (!startedPromise) {
+      startedPromise = targetFunction()
+        .then(result => {
+          startedPromise = undefined;
+          return result;
+        })
+        .catch(error => {
+          startedPromise = undefined;
+          return error;
+        });
+    }
+
     return startedPromise;
   };
 };
+```
+
+_细心的朋友，是不是发现还没有考虑参数的问题。我觉得，参数意味着可变，多次调用时，参数若不同，结果也就可能不一样。而此时的管道方法也就无意义，所以，不考虑有参数的问题。_
+
+_但不是说有参数的话，就不能使用这个管道方法了。可以把会被同时调用且传入的相同参数场景，使用管道方法封装成一个单独的无参方法。_
+
+```js
+const getData = async (dateFrom, dateTo) => {};
+const getYear2018Data = pipeline(async () => {
+  let data = await getData("20180101", "20181231");
+}, true);
+
+const caller1 = async () => {
+  let data = await getYear2018Data();
+  // ...
+};
+const caller2 = async () => {
+  let data = await getYear2018Data();
+  // ...
+};
+
+caller1();
+caller2();
 ```
