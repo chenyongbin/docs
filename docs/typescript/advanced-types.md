@@ -8,7 +8,7 @@
 - [字符串字面量类型](#string-literal-types)
 - [数值字面量类型](#numberic-literal-types)
 - [枚举成员类型](#enum-memeber-types)
-- [区分的联合类型](#discriminated-unions-types)
+- [有区别的并集](#discriminated-unions-types)
 - [多态 this 类型](#polymorphic-this-types)
 - [索引类型](#index-types)
 - [映射类型](#mapped-types)
@@ -199,15 +199,96 @@ function rollDice(): 1 | 2 | 3 | 4 | 5 | 6 {
 }
 ```
 
-<h2 id='enum-memeber-types'>枚举成员类型</h2>  
+<h2 id='enum-memeber-types'>枚举成员类型</h2>
 
 当枚举成员被使用字面量初始化后，可以作为类型。
 
-<h2 id='discriminated-unions-types'>区分的联合类型</h2>
+<h2 id='discriminated-unions-types'>有区别的并集</h2>
+
+你可以联合单例类型、联合类型、类型保护和类型别名，创建一个成为**有区别的并集**，也称为**标签联合类型**和**代数类型**的高级范式。有区别的并集在函数式编程中很有用。一些语言会自动区分并集，而`TypeScript`是基于今天已经存在的`JavaScript`方式创建。
+
+有区别的并集有三要素：
+
+- 所有类型必须包含一个可以单例类型，即*判别式*
+- 使用类型别名联合这些类型，即*联合*
+- 在通用类型上使用类型保护
+
+```ts
+interface Square {
+  kind: "square";
+  size: number;
+}
+interface Rectangle {
+  kind: "rectangle";
+  width: number;
+  height: number;
+}
+interface Circle {
+  kind: "circle";
+  radius: number;
+}
+
+type Shape = Square | Rectangle | Circle;
+function area(s: Shape) {
+  switch (s.kind) {
+    case "square":
+      return s.size * s.size;
+    case "rectangle":
+      return s.height * s.width;
+    case "circle":
+      return Math.PI * s.radius ** 2;
+  }
+}
+```
+
+**穷尽检查**
+
+我们想让编译器知道我们没有包含有区别的并集所有的变体，就像上面的例子，假如我们为`Shape`再添加一个联合类型，我们需要修改`area`方法，否则会报错。
+
+有两种方法可以解决这个问题：
+
+- 开启`--strictNullCheks`标签，并为返回类型增加`undefined`
+- 使用`never`类型通过`TypeScript`的穷尽检查
 
 <h2 id='polymorphic-this-types'>多态this类型</h2>
 
+一个多态`this`类型代表包含类和接口的自类型。这被称为方法绑定多态性。这使得接口层级流畅且易于表达。
+
+```ts
+class BasicCalculator {
+  public constructor(protected value: number = 0) {}
+  public currentValue(): number {
+    return this.value;
+  }
+  public add(operand: number): this {
+    this.value += operand;
+    return this;
+  }
+  public multiply(operand: number): this {
+    this.value *= operand;
+    return this;
+  }
+  // ... other operations go here ...
+}
+
+let v = new BasicCalculator(2)
+  .multiply(5)
+  .add(1)
+  .currentValue();
+```
+
 <h2 id='index-types'>索引类型</h2>
+
+利用索引类型，可以通过编译器检查，使用动态属性名称。在`TypeScript`中，可以使用**索引检索符**和**索引访问符**来实现使用动态属性名称访问属性。
+
+- **索引检索符**，格式`keyof T`。对于类型`T`，`keyof T`表示`T`所有已知公共属性的并集
+- **索引访问符**，格式`T[K]`。
+
+```ts
+function pluck<T, K extends keyof T>(o: T, propertyNames: K[]): T[K][] {
+  return propertyNames.map(n => o[n]);
+}
+```
 
 <h2 id='mapped-types'>映射类型</h2>
 
