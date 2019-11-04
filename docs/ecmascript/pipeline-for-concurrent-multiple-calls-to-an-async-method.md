@@ -114,15 +114,17 @@ const pipeline = (targetFunction, shouldCacheResult = false) => {
     }
 
     if (!startedPromise) {
-      startedPromise = targetFunction()
-        .then(result => {
-          startedPromise = null;
-          return result;
-        })
-        .catch(error => {
-          startedPromise = null;
-          return error;
-        });
+      startedPromise = new Promise((resolve, reject) => {
+        targetFunction()
+          .then(result => {
+            promiseResult = result;
+            resolve(result);
+          })
+          .catch(error => reject(error))
+          .finally(() => {
+            startedPromise = null;
+          });
+      });
     }
 
     return startedPromise;
@@ -137,16 +139,6 @@ const decryptId = pipeline(
   () => fetch("url").then(response => response.json()),
   true
 );
-```
-
-**注意**：在某些应用退出后，资源仍未释放的环境。若想使用缓存异步结果逻辑，不能使用上面这种方式封装异步方法，而应该在`export`关键字后封装。
-
-```js
-const decryptId = () => fetch("url").then(response => response.json());
-
-export {
-  decryptId: pipeline(decryptId)
-}
 ```
 
 `TypeScript`版管道方法：
@@ -164,15 +156,17 @@ const pipeline = <T>(
     }
 
     if (!startedPromise) {
-      startedPromise = targetFunction()
-        .then(result => {
-          startedPromise = undefined;
-          return result;
-        })
-        .catch(error => {
-          startedPromise = undefined;
-          return error;
-        });
+      startedPromise = new Promise((resolve, reject) => {
+        targetFunction()
+          .then(result => {
+            promiseResult = result;
+            resolve(result);
+          })
+          .catch(error => reject(error))
+          .finally(() => {
+            startedPromise = null;
+          });
+      });
     }
 
     return startedPromise;
