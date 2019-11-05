@@ -292,4 +292,32 @@ function pluck<T, K extends keyof T>(o: T, propertyNames: K[]): T[K][] {
 
 <h2 id='mapped-types'>映射类型</h2>
 
+根据旧类型，按照一定的方式转换成一个新类型。
+
+```ts
+type Readonly<T> = {
+  readonly [P in keyof T]: T[P];
+};
+type Partial<T> = {
+  [P in keyof T]?: T[P];
+};
+```
+
 <h2 id='conditional-types'>条件类型</h2>
+
+`TypeScript`2.8 引入增加了不均匀映射类型能力的*条件类型*。一个条件类型根据条件表达式决定选择两个可能类型中的一个。
+
+```ts
+T extends U ? X : Y
+```
+
+一个条件类型`T extends U ? X : Y`要么解析为`X`或`Y`类型，要么被延迟解析出结果，因为此时条件依赖一到多个类型变量。当`T`或`U`包含类型变量，是否解析为`X`或`Y`，或延迟解析，是由类型系统是否有足够信息判定`T`是否可赋值给`U`决定的。
+
+下面这个例子的类型会被延迟解析出：
+
+```ts
+declare function f<T extends boolean>(x: T): T extends true ? string : number;
+
+// Type is 'string | number
+let x = f(Math.random() < 0.5);
+```
