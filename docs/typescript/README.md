@@ -13,4 +13,5 @@
 * [类型推断](type-inference.md)  
 * [类型兼容性](type-compatibility.md)  
 * [高级类型](advanced-types.md)  
+* [模块](modules.md)  
 * [JSX](jsx.md)  

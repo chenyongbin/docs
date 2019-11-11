@@ -191,3 +191,21 @@ class Component extends React.Component<PropsType, {}> {
 </Component>
 
 ```
+
+## JSX 结果类型
+
+默认情况下，JSX 表达式的结果是`any`类型。你可以通过指定`JSX.Element`接口自定义结果类型。但是不可能通过这个接口查找元素、属性或子元素的信息。
+
+## 嵌入式表达式
+
+JSX 允许使用花括号`{}`环绕表达式，嵌入到标签之间。
+
+```ts
+var a = (
+  <div>
+    {["foo", "bar"].map(i => (
+      <span>{i / 2}</span>
+    ))}
+  </div>
+);
+```
