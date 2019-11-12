@@ -92,12 +92,92 @@ strings.forEach(s => {
     `"${s}" - ${validator.isAcceptable(s) ? "matches" : "does not match"}`
   );
 });
-```  
+```
 
-## 加载可选模块及其他高级场景  
+## 加载可选模块及其他高级场景
 
 暂无
 
-## 与其他JavaScript库合作  
+## 与其他 JavaScript 库合作
 
-为了描述没有使用TypeScript库的形状，需要声明这些库暴露的API。我们称那些只有声明没有实现的为“外围”，这些声明定义通常在`.d.ts`文件内。  
+为了描述没有使用 TypeScript 库的形状，需要声明这些库暴露的 API。我们称那些只有声明没有实现的为“外围”，这些声明定义通常在`.d.ts`文件内。
+
+除了把声明放在各自文件外，把所有的声明放在一个文件内更方便。示例如下：
+
+```ts
+declare module "url" {
+  export interface Url {
+    protocol?: string;
+    hostname?: string;
+    pathname?: string;
+  }
+
+  export function parse(
+    urlStr: string,
+    parseQueryString?,
+    slashesDenoteHost?
+  ): Url;
+}
+
+declare module "path" {
+  export function normalize(p: string): string;
+  export function join(...paths: any[]): string;
+  export var sep: string;
+}
+```
+
+定义了上述声明后，可以使用三斜杠指令引入该声明。
+
+```ts
+/// <reference path="node.d.ts"/>
+import * as URL from "url";
+let myUrl = URL.parse("http://www.typescriptlang.org");
+```
+
+如果不想把在使用外围模块声明前就声明，可以使用一种快捷声明方式。
+
+```ts
+// 声明
+declare module "hot-new-module";
+// 使用，注意此时的y是any类型
+import x, { y } from "hot-new-module";
+x(y);
+```
+
+还可以使用通配符的形式添加声明。
+
+```ts
+declare module "*!text" {
+  const content: string;
+  export default content;
+}
+// Some do it the other way around.
+declare module "json!*" {
+  const value: any;
+  export default value;
+}
+```
+
+使用时
+
+```ts
+import fileContent from "./xyz.txt!text";
+import data from "json!http://example.com/data.json";
+console.log(data, fileContent);
+```
+
+## 结构模块指南
+
+### 尽可能地在顶层导出
+
+- 导出应尽可能地简洁，涉及的层级应该尽可能地少。
+- 命名空间会增加额外的层，类的静态方法也会增加嵌套的层。
+- 如果只是想导出单个类、方法，应使用`export default`
+
+### 重新导出扩展模块
+
+扩展模块的最好方式是在不改变源模块，只是增加新的功能，并重新导出  
+
+### 不要在模块中使用命名空间  
+
+如题  
