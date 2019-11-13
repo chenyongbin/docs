@@ -14,4 +14,5 @@
 * [类型兼容性](type-compatibility.md)  
 * [高级类型](advanced-types.md)  
 * [模块](modules.md)  
+* [命名空间](namespaces.md)  
 * [JSX](jsx.md)  
