@@ -15,4 +15,5 @@
 * [高级类型](advanced-types.md)  
 * [模块](modules.md)  
 * [命名空间](namespaces.md)  
+* [命名空间和模块](namespaces-and-modules.md)  
 * [JSX](jsx.md)  
