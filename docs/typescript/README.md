@@ -16,4 +16,5 @@
 * [模块](modules.md)  
 * [命名空间](namespaces.md)  
 * [命名空间和模块](namespaces-and-modules.md)  
+* [模块解析](module-resolution.md)  
 * [JSX](jsx.md)  
