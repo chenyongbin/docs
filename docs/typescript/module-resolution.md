@@ -72,7 +72,7 @@ import { t } from "./moduleB";
 import { t } from "moduleB";
 
 // 查找策略
-// src/node_modules/moduleB.ts  
+// src/node_modules/moduleB.ts
 // src/node_modules/moduleB.tsx
 // src/node_modules/moduleB.d.ts
 // src/node_modules/moduleB/package.json (包含types属性)
@@ -80,4 +80,57 @@ import { t } from "moduleB";
 // src/node_moduels/moduleB/index.ts
 // src/node_moduels/moduleB/index.tsx
 // src/node_moduels/moduleB/index.d.ts
+```
+
+## 额外标志
+
+项目的输出有时不完全匹配源代码，TS 有一些额外的标志来通知转换编译器在转换时的行为。
+
+### 基地址
+
+指定非相对路径时，文件路径的相对地址。
+
+### 路径映射
+
+针对那些不直接定位于基地址下的模块，可以使用映射配置来映射模块的路径。TS 支持在配置文件`tsconfig.json`中配置`paths`字段来指定模块的路径。
+
+```ts
+{
+  "compilerOptions": {
+    "baseUrl": ".", // This must be specified if "paths" is.
+    "paths": {
+      "jquery": ["node_modules/jquery/dist/jquery"] // This mapping is relative to "baseUrl"
+    }
+  }
+}
+```
+
+_注意：当为其他值设置了基地址后，也要同步修改映射的地址，因为此时模块映射地址是基于基地址来定位的。_
+
+### 虚拟文件夹
+
+有时项目中分属不同文件夹内的文件在编译期间会被合并到同一个文件夹内。这被视为一系列源文件夹创建了一个虚拟文件夹。
+
+使用`rootDirs`，可以通知编译器的根部虚构这个虚拟的文件夹，然后因此编译器可以在这些虚拟文件夹内解析相对模块导入，就好像它们合并在同一个文件内似的。
+
+```ts
+ src
+ └── views
+     └── view1.ts (imports './template1')
+     └── view2.ts
+
+ generated
+ └── templates
+         └── views
+             └── template1.ts (imports './view2')
+
+// tsconfig.json
+{
+  "compilerOptions": {
+    "rootDirs": [
+      "src/views",
+      "generated/templates/views"
+    ]
+  }
+}
 ```
