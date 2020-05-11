@@ -3,7 +3,6 @@
  */
 
 const fs = require("fs");
-const fsPromises = require("fs").promises;
 const path = require("path");
 const { docs } = require("../constants");
 
@@ -13,50 +12,44 @@ const DOCS_FILES = [],
     path: "",
     isFile: false,
     isDirectory: false,
-    files: null
+    files: null,
   };
 
-(async function() {
-  console.log("build-navigations start...");
-
-  /** 遍历文件夹结构 */
-  await foreachDirectoryRecursively([[process.cwd(), ["docs"]]]);
-
-  /** 逐级遍历文件夹，生成每一层的导航数据 */
-
-  /** 将导航数据写入文件 */
-
-  console.log("build-navigations end...");
-})();
-
-function watchDocsDirectory(path) {}
-
-function unwatchDocsDirectory(path) {}
-
-function readLine(fileName) {}
-
-/**
- * 递归遍历文件夹
- * @param {string} dirPath 相对文件夹路径
- */
-async function foreachDirectoryRecursively(dirName, dirPath, dirMaps) {
+const iterateDirectory = (dirPath, restDirPaths = [], results = []) => {
   if (!dirPath) {
-    return null;
+    if (!restDirPaths || restDirPaths.length == 0) {
+      return results;
+    } else {
+      const newPath = restDirPaths.pop();
+      return iterateDirectory(newPath, restDirPaths, results);
+    }
   }
 
-  try {
-    dirMaps = dirMaps || {};
-    let dirents = await fsPromises.readdir(dirPath, { withFileTypes: true });
-    for (let dirent of dirents) {
-      if (dirent.isFile()) {
-        dirMaps[dirName].files = dirMaps[dirName].files || [];
-        dirMaps[dirName].files.push(dirent.name);
-      } else if (dirent.isDirectory()) {
-        dirMaps[dirName].directories = dirMaps[dirName].directories || [];
-        dirMaps[dirName].directories.push(dirent.name);
-      }
+  const dirents = fs.readdirSync(dirPath, { withFileTypes: true });
+  for (const dir of dirents) {
+    if (dir.isFile()) {
+      results.push({ path: dir.name, parent: dirPath });
+    } else if (dir.isDirectory()) {
+      restDirPaths.push(path.join(dirPath, dir.name));
     }
-  } catch (error) {
-    console.error(`遍历文件夹(${dirPath}失败`, error);
   }
+
+  if (restDirPaths.length == 0) {
+    return results;
+  } else {
+    const newPath = restDirPaths.pop();
+    return iterateDirectory(newPath, restDirPaths, results);
+  }
+};
+
+try {
+  const beginTime = Date.now();
+  const results = iterateDirectory(path.join(process.cwd(), "docs"));
+  fs.writeFileSync(
+    path.join(process.cwd(), "data.json"),
+    JSON.stringify(results)
+  );
+  console.log(`生成导航结束，耗时${Date.now() - beginTime}毫秒`);
+} catch (error) {
+  console.warn(error);
 }
